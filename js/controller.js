@@ -223,12 +223,17 @@ var vm,
             // does this player already own this zone, if so, renew it
             if (zone.owner && zone.owner === player.name) {
                 if (player.name === "YOU") {
-                    window.alert("Zone renewed");
-                    log("YOU renewed " + zone.name);
-                } else {
-                    log(player.name + " renewed a zone");
+                    if (window.confirm("Do you wish to renew this zone for " + Math.floor(zone.cost * settings.ZONES_RENEW_FACTOR) + " credits?")) {
+                        player.credits = player.credits - Math.floor(zone.cost * settings.ZONES_RENEW_FACTOR);
+                        zone.timeRemaining = settings.ZONES_RESET_TIME;
+                        window.alert("Zone renewed");
+                        log("YOU renewed " + zone.name + " for " + Math.floor(zone.cost * settings.ZONES_RENEW_FACTOR) + " credits");
+                    }
+                } else if (player.credits >= zone.cost && Math.random() > (1 - settings.AI_BUY_ZONE_CHANCE(vm.currentGame.timeRemaining))) {
+                    player.credits = player.credits - Math.floor(zone.cost * settings.ZONES_RENEW_FACTOR);
+                    zone.timeRemaining = settings.ZONES_RESET_TIME;
+                    log(player.name + " renewed a zone for " + Math.floor(zone.cost * settings.ZONES_RENEW_FACTOR) + " credits");
                 }
-                zone.timeRemaining = settings.ZONES_RESET_TIME;
 
             // is zone controlled by someone else?
             } else if (zone.owner) {

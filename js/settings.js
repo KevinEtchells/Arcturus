@@ -8,6 +8,7 @@ var settings = {
     ZONES_COST_MIN: 25,
     ZONES_COST_MAX: 100,
     ZONES_RENT_FACTOR: 1, // percentage of control cost, 1 = 100%
+    ZONES_RENEW_FACTOR: 0.5, // percentage of control cost, 1 = 100%
     ZONES_RESET_TIME: 12 * 60, // seconds
     
     CREDITS_START: 500,
@@ -42,12 +43,6 @@ var settings = {
         prop;
     
     if (savedSettings) {
-        /*
-        for (prop in savedSettings) {
-            if (savedSettings.hasOwnProperty(prop)) {
-                settings[prop] = savedSettings[prop];
-            }
-        }*/
         settings.GAME_LENGTH = savedSettings.GAME_LENGTH;
         settings.gameArea = savedSettings.gameArea;
     }
