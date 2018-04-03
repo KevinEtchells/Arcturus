@@ -1,6 +1,7 @@
 /*global Vue*/
 /*global settings*/
 /*global maps*/
+/*global utils*/
 
 var vm,
     enterZone;
@@ -9,91 +10,10 @@ var vm,
     
     "use strict";
     
-    var utils,
-        countdown,
+    var countdown,
         initAI,
         log;
 
-    utils = {
-
-        createZones: function () {
-
-            var attempts = 0,
-                newZoneOkay,
-                newZone,
-                outerPoints = {};
-            
-            vm.currentGame.zones = [];
-            
-            // work out furthest extremities of gameArea
-            settings.gameArea.forEach(function (point) {
-                if (!outerPoints.n || outerPoints.n < point.lat) {
-                    outerPoints.n = point.lat;
-                }
-                if (!outerPoints.s || outerPoints.s > point.lat) {
-                    outerPoints.s = point.lat;
-                }
-                if (!outerPoints.e || outerPoints.e < point.lng) {
-                    outerPoints.e = point.lng;
-                }
-                if (!outerPoints.w || outerPoints.w > point.lng) {
-                    outerPoints.w = point.lng;
-                }
-            });
-
-            while (vm.currentGame.zones.length < settings.ZONE_COUNT && attempts < 5000) {
-                newZoneOkay = false;
-                
-                // create a new random zone:
-                newZone = {
-                    latitude: (Math.random() * (outerPoints.n - outerPoints.s)) + outerPoints.s,
-                    longitude: (Math.random() * (outerPoints.e - outerPoints.w)) + outerPoints.w
-                };
-                
-                // check it fits within polygon
-                if (maps.inGameArea(newZone.latitude, newZone.longitude)) {
-                    newZoneOkay = true;
-                }
-                
-                // check this doesn't overlap an existing zone:
-                vm.currentGame.zones.forEach(function (zone) {
-                    if (utils.distanceBetweenPoints(newZone, zone) < (settings.ZONES_RADIUS * settings.ZONE_SPACING_FACTOR)) {
-                        newZoneOkay = false;
-                    }
-                });
-
-                // if all checks okay, add it to the list of existing zones:
-                if (newZoneOkay) {
-                    newZone.name = "Zone " + (vm.currentGame.zones.length + 1);
-                    newZone.index = vm.currentGame.zones.length; // used to determine key for DB writes
-                    newZone.cost = Math.floor(Math.random() * (settings.ZONES_COST_MAX - settings.ZONES_COST_MIN)) + settings.ZONES_COST_MIN;
-                    vm.currentGame.zones.push(newZone);
-                }
-                attempts = attempts + 1;
-            }
-
-            maps.showZones(vm.currentGame.zones, vm.currentGame.settings);
-
-        },
-
-        distanceBetweenPoints: function (coords1, coords2) { // returns distance in metres
-            var toRad = function (value) {
-                    return value * Math.PI / 180;
-                },
-                R = 6371000,
-                dLat = toRad(coords2.latitude - coords1.latitude),
-                dLon = toRad(coords2.longitude - coords1.longitude),
-                lat1 = toRad(coords1.latitude),
-                lat2 = toRad(coords2.latitude),
-                a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2),
-                c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)),
-                d = R * c;
-            return d;
-        }
-
-    };
-
-    
     vm = new Vue({
         el: "#app",
         data: {
@@ -163,7 +83,11 @@ var vm,
                 settings.GAME_LENGTH = document.querySelector("#game-time").value * 60;
                 settings.gameArea = maps.getGameArea();
                 window.localStorage.setItem("Arcturus_Settings", JSON.stringify(settings));
-                utils.createZones();
+                
+                // recreate zones, just in case game area has changed
+                vm.currentGame.zones = utils.createZones();
+                maps.showZones(vm.currentGame.zones, vm.currentGame.settings);
+                
                 this.page = "home";
             },
             
@@ -194,7 +118,8 @@ var vm,
 
                 } else {
                     maps.init(vm.currentGame.settings);
-                    utils.createZones();
+                    vm.currentGame.zones = utils.createZones();
+                    maps.showZones(vm.currentGame.zones, vm.currentGame.settings);
                 }
 
             }, 1000);
