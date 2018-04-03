@@ -1,0 +1,124 @@
+<!doctype HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Arcturus</title>
+        <script src="js/libs/vue.min.js"></script>
+        <script src="https://use.fontawesome.com/60406474de.js"></script>
+        <script src="js/settings.js"></script>
+        <script src="js/maps.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDw9qJCFkj7WJDFrUEhJPb0xdKdTTkZqsM"></script>
+        <script src="js/libs/maps.google.polygon.containsLatLng.js"></script>
+        <link rel="stylesheet" href="styles.css" type="text/css"/>
+    </head>
+    <body>
+        <div id="app">
+            
+            <header class="title-bar">
+                <h1>Arcturus</h1>
+                <div v-if="currentGame.timeRemaining !== -1">
+                    <p><i class="fa fa-clock-o" aria-label="time remaining: "></i> {{utils.formatTime(currentGame.timeRemaining)}}</p>
+                    <p><i class="fa fa-star" aria-label="credits: "></i> {{currentGame.players[0].credits}}</p>
+                </div>
+            </header>
+            
+            <main>
+
+                <div v-if="gpsWarning" class="gps-warning">
+                    <span>GPS Error</span>
+                    <button v-on:click="retryGPS">Try Again</button>
+                </div>
+
+                <template v-if="page === 'home'">
+                    <h2>Home</h2>
+                    <!--<p>Arcturus is a multiplayer game played outdoors using GPS.</p>-->
+                    <button v-if="currentGame.timeRemaining === -1" v-on:click="startGame">Start Game</button>
+                    <!--<p>Latitude: {{position.lat}}</p><p>Longitude: {{position.lng}}</p>-->
+                    <template v-if="currentGame.timeRemaining !== -1">
+                        
+                        <h3>Logs:</h3>
+                        <label for="show-all-logs"><input type="checkbox" id="show-all-logs" v-model="showAllLogs"/> Show All</label>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="log in sortedLogs" v-if="showAllLogs || log.msg.indexOf('YOU') !== -1 || log.msg.indexOf('Game') === 0">
+                                    <td>{{utils.formatTime(log.time)}}</td>
+                                    <td>{{log.msg}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+
+                </template>
+                
+                <div v-show="page === 'map'" id="map"></div>
+                
+                <template v-if="page === 'scores'">
+                    <h2>Scores</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Credits</th>
+                                <th>Zones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="player in sortedPlayers">
+                                <td>{{player.name}}</td>
+                                <td>{{player.credits}}</td>
+                                <td>{{utils.zoneCount(player.name)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>    
+                </template>
+                
+                <template v-if="page === 'zones'">
+                    <h2>My Zones</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Zone</th>
+                                <th>Expires</th>
+                                <th>Earns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="zone in currentGame.zones" v-if="zone.owner && zone.owner === 'YOU'">
+                                <td>{{zone.name}}</td>
+                                <td>{{utils.formatTime(zone.timeRemaining)}}</td>
+                                <td>{{Math.floor(zone.cost * currentGame.settings.ZONES_RENT_FACTOR)}} credits</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                
+                <div v-show="page === 'settings'" class="settings">
+                    <header>
+                        <h2>Settings</h2>
+                        <button v-on:click="saveSettings">Save Changes</button>
+                    </header> 
+                    <label for="game-time">Game Time:</label>
+                    <input id="game-time" type="number" v-bind:value="settings.GAME_LENGTH / 60"/> minutes
+                    <label for="game-area">Game Area:</label>
+                    <div id="game-area"></div>
+                </div>
+
+            </main>
+            <footer>
+                <button v-on:click="page = 'home'">Home</button>
+                <button v-on:click="page = 'map'">Map</button>
+                <button v-on:click="page = 'scores'" v-if="currentGame.timeRemaining !== -1">Scores</button>
+                <button v-on:click="page = 'zones'" v-if="currentGame.timeRemaining !== -1">My Zones</button>
+                <button v-on:click="page = 'settings'" v-if="currentGame.timeRemaining === -1">Settings</button>
+            </footer>
+        </div>
+        <script src="js/controller.js"></script>
+    </body>
+</html>

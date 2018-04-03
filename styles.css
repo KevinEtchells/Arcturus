@@ -1,0 +1,32 @@
+body {font-family: sans-serif; margin: 0;}
+
+label {display: block; margin-top: 8px;}
+button {background-color: #24294f; border: 1px solid; color: #f0fdf9; padding: 10px; width: 100%;}
+input[type='text'], input[type='number'] {padding: 5px; width: calc(100% - 14px);}
+
+.title-bar, footer {background-color: #24294f; width: calc(100% - 10px);}
+
+.title-bar {align-items: center; color: #f0fdf9; display: flex; justify-content: space-between; padding: 5px; position: fixed;}
+h1 {font-weight: 100; margin: 0;}
+.title-bar p {margin: 0;}
+
+footer {bottom: 0; display: flex; justify-content: space-between; padding: 5px; position: fixed;}
+footer button {padding: 5px 10px; width: calc(25% - 4px);}
+
+.gps-warning {background-color: red; color: white; padding: 3px; padding-bottom: 5px;}
+.gps-warning button {background-color: transparent; float: right; padding: 2px; width: 100px;}
+
+main {padding: 47px 5px 5px 5px;}
+h2 {margin: 8px 0;}
+p {margin: 5px 0;}
+button[type='submit'] {margin-top: 8px;}
+
+#map {height: calc(100vh - 100px); left: -5px; width: 100vw;}
+
+.settings header {display: flex; justify-content: space-between; width: 100%;}
+.settings header button {margin: 3px 0; width: 120px;}
+#game-area {height: 90vw; margin: 0 calc(5vw - 5px); width: 90vw;}
+
+.hidden {display: none;}
+th {text-align: left;}
+th, td {padding: 2px 5px;}
