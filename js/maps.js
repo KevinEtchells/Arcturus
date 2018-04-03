@@ -70,7 +70,8 @@ var maps = {};
                 zones.forEach(function (zone) {
                     var zoneMarker = new google.maps.Marker({
                             position: {lng: zone.longitude, lat: zone.latitude},
-                            map: mapMain
+                            map: mapMain,
+                            label: (zone.index + 1).toString()
                         }),
                         zoneRadius = new google.maps.Circle({
                             strokeColor: "red",
