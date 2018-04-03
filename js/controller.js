@@ -104,18 +104,20 @@ var vm,
 
             window.setTimeout(function () {
                 
-                if (savedDataStr && window.confirm("Would you like to continue with the previous game?")) {
-
-                    // TO DO: the trouble with this is that the AI timers start from scratch again
-                    savedDataObj = JSON.parse(savedDataStr);
-                    vm.currentGame = savedDataObj;
-                    maps.init(savedDataObj.settings);
-                    maps.showZones(savedDataObj.zones, savedDataObj.settings);
-                    window.setTimeout(function () {
-                        countdown();
-                        initAI(true);
-                    }, 1000);
-
+                if (savedDataStr) {
+                    if (window.confirm("Would you like to continue with the previous game?")) {
+                        // TO DO: the trouble with this is that the AI timers start from scratch again
+                        savedDataObj = JSON.parse(savedDataStr);
+                        vm.currentGame = savedDataObj;
+                        maps.init(savedDataObj.settings);
+                        maps.showZones(savedDataObj.zones, savedDataObj.settings);
+                        window.setTimeout(function () {
+                            countdown();
+                            initAI(true);
+                        }, 1000);
+                    } else { // clear previous game data
+                        window.localStorage.removeItem("Arcturus_SaveGameData");
+                    }
                 } else {
                     maps.init(vm.currentGame.settings);
                     vm.currentGame.zones = utils.createZones();
